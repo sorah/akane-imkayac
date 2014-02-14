@@ -1,6 +1,6 @@
-# Akane::Imkayac
+# akane-imkayac - storage plugin for akane that post matched tweet to im.kayac.com
 
-TODO: Write a gem description
+Storage plugin gem for [akane](https://github.com/sorah/akane), that posts matched tweets to im.kayac.com for notification.
 
 ## Installation
 
@@ -18,7 +18,29 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+In your akane configuration yaml:
+
+```
+storages:
+  - imkayac:
+      user: <im kayac user name>
+#     password: <your password (optional)>
+#     secret: <your secret key (optional)>
+#     handler: <handler erb template>
+#     message: <message erb template>
+      keywords:
+        - keyword to notify 1
+        - keyword to notify 2
+        - ...
+      excludes:
+        - keyword to exclude 1
+        - keyword to exclude 2
+        - ...
+```
+
+I set `'tweetbot:///status/<%= tweet.id %>'` to handler for Tweetbot.
+
+`handler` and `message` params are evaluated as ERB. Variable `account` and `tweet` (`Twitter::Tweet`) is available.
 
 ## Contributing
 
