@@ -42,7 +42,7 @@ module Akane
         unless tweet.text &&
           !tweet.retweet? &&
           @config["excludes"].all? { |_| ! tweet.text.include?(_.to_s) } &&
-          @config["keywords"].all? { |_| tweet.text.include?(_.to_s) }
+          @config["keywords"].any? { |_| tweet.text.include?(_.to_s) }
           return
         end
         payload = { message: ERB.new(@config["message"]).result(binding), }

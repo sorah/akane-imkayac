@@ -49,6 +49,18 @@ describe Akane::Storages::Imkayac do
         end
       end
 
+      context "when multiple keyword given, and tweet matched to one of them" do
+        let(:config) { base_config.merge("keywords" => %w(foobar keyword)) }
+
+        it "sends" do
+          subject.record_tweet('tester', tweet)
+
+          expect(a_request(:post, "#{endpoint}/tester").with(
+            body: {message: '[tw] user: keyword'}
+          )).to have_been_made
+        end
+      end
+
       context "when matched both keywords and ignored keywords" do
         let(:tweet_text) { 'keyword ignore' }
 
