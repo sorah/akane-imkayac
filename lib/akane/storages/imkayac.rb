@@ -20,6 +20,7 @@ module Akane
         super
 
         @config["keywords"] ||= []
+        @config["screen_names"] ||= []
         @config["excludes"] ||= []
         @config["message"]  ||= DEFAULT_MESSAGE
         @config["endpoint"] ||= DEFAULT_ENDPOINT
@@ -39,12 +40,8 @@ module Akane
       end
 
       def record_tweet(account, tweet)
-        unless tweet.text &&
-          !tweet.retweet? &&
-          @config["excludes"].all? { |_| ! tweet.text.include?(_.to_s) } &&
-          @config["keywords"].any? { |_| tweet.text.include?(_.to_s) }
-          return
-        end
+        return unless match_rule?(tweet)
+
         payload = { message: ERB.new(@config["message"]).result(binding), }
 
         payload[:password] = @config["password"] if @config["password"]
@@ -76,6 +73,18 @@ module Akane
       end
 
       def record_message(*)
+      end
+
+      private
+
+      def match_rule?(tweet)
+        tweet.text &&
+        !tweet.retweet? &&
+        @config["excludes"].all? { |_| ! tweet.text.include?(_.to_s) } &&
+        (
+          @config["keywords"].any? { |_| tweet.text.include?(_.to_s) } ||
+          @config["screen_names"].include?(tweet.user.screen_name)
+        )
       end
     end
   end

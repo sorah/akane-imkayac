@@ -8,7 +8,7 @@ require 'twitter/tweet'
 require 'twitter/user'
 
 describe Akane::Storages::Imkayac do
-  let(:base_config) { {"user" => 'tester', "keywords" => %w(keyword), "excludes" => %w(ignore)} }
+  let(:base_config) { {"user" => 'tester', "screen_names" => ["match_user"], "keywords" => %w(keyword), "excludes" => %w(ignore)} }
   let(:config) { base_config }
 
   let(:endpoint) { "http://im.kayac.com/api/post" }
@@ -73,6 +73,40 @@ describe Akane::Storages::Imkayac do
       context "when matched tweet is a retweet" do
         it "doesn't send" do
           subject.record_tweet('tester', retweet)
+          expect(a_request(:post, "#{endpoint}/tester")).not_to have_been_made
+        end
+      end
+    end
+
+    describe "screen_name matching:" do
+      let(:tweet_text) { '---' }
+      context "when matched user" do
+        let(:screen_name) { 'match_user' }
+
+        it "sends" do
+          subject.record_tweet('tester', tweet)
+
+          expect(a_request(:post, "#{endpoint}/tester").with(
+            body: {message: '[tw] match_user: ---'}
+          )).to have_been_made
+        end
+      end
+
+      context "when not match" do
+        let(:screen_name) { 'doesnt_match_user' }
+
+        it "doesn't send" do
+          subject.record_tweet('tester', tweet)
+          expect(a_request(:post, "#{endpoint}/tester")).not_to have_been_made
+        end
+      end
+
+      context "when matched user but having excluded keyword" do
+        let(:screen_name) { 'match_user' }
+        let(:tweet_text) { 'ignore' }
+
+        it "doesn't send" do
+          subject.record_tweet('tester', tweet)
           expect(a_request(:post, "#{endpoint}/tester")).not_to have_been_made
         end
       end
